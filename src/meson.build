@@ -1,6 +1,7 @@
 gongbang_sources = [
-  'gongbanggraph.vala'
+  'gongbanggraph.vala',
+  'gongbangloadxml.vala'
 ]
 
 gongbang_lib = library('gongbang', gongbang_sources,
-  dependencies: [glib, gobject]) 
+  dependencies: [glib, gobject, gio]) 
