@@ -6,6 +6,7 @@ project('gongbang', ['c', 'vala'],
 glib = dependency('glib-2.0')
 gobject = dependency('gobject-2.0')
 gio = dependency('gio-2.0')
+gobject_introspection = dependency('gobject-introspection-1.0')
 
 subdir('src')
 
