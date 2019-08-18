@@ -5,20 +5,39 @@ namespace Gongbang {
      */
     public abstract class Node {}
 
-    public class NodeValue {
+    public class NodeValue: Node{
         public Value value;
+
+        public NodeValue (Value value) {
+            this.value = value;
+        }
     }
 
-    public class NodeStruct {
+    public class NodeStruct: Node{
+        public Type type;
         public HashTable<string, int32> members;
+
+        public NodeStruct (Type type) {
+            this.type = type;
+        }
     }
 
-    public class NodeList {
+    public class NodeList: Node{
+        public Type type;
         public GenericArray<int32> items;
+
+        public NodeList (Type type) {
+            this.type = type;
+        }
     }
 
-    public class NodeMap {
+    public class NodeMap: Node{
+        public Type type;
         public HashTable<int32, int32> items;
+
+        public NodeMap (Type type) {
+            this.type = type;
+        }
     }
 
     /**
