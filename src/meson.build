@@ -1,7 +1,7 @@
-gongbang_sources = [
+gongbang_sources = files(
   'gongbanggraph.vala',
   'gongbangloadxml.vala'
-]
+)
 
 gongbang_inc = include_directories('.')
 
