@@ -9,4 +9,4 @@ gio = dependency('gio-2.0')
 gobject_introspection = dependency('gobject-introspection-1.0')
 
 subdir('src')
-
+subdir('test')
