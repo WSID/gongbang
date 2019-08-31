@@ -13,7 +13,7 @@ namespace Gongbang {
           parse, null);
         ctx.parse (xml, -1);
 
-        return new Graph();
+        return parse.graph;
     }
 
     public Graph load_xml_file (File file, Cancellable? cancel = null) throws Error {
@@ -34,6 +34,12 @@ namespace Gongbang {
         public bool is_text;
         public HashTable<string, int32> subnodes;
         public Value value;
+
+        public XMLParseElement () {
+            type = Type.INVALID;
+            is_text = false;
+            subnodes = new HashTable<string, int32> (string.hash, str_equal);
+        }
     }
 
     /* This will parse either of one form.
@@ -58,7 +64,7 @@ namespace Gongbang {
             if ((parent != null) && (parent.is_text))
                 throw new MarkupError.INVALID_CONTENT("Text marked element!");
 
-            string? picked_type_str;
+            unowned string? picked_type_str;
 
             Markup.collect_attributes (name, attr_names, attr_values,
                 Markup.CollectType.STRING | Markup.CollectType.OPTIONAL, "type", out picked_type_str);
@@ -79,16 +85,22 @@ namespace Gongbang {
             XMLParseElement? tail = (!) elements.pop_tail();
             Gongbang.Node? node = null;
 
+
             if (tail.is_text) {
                 node = new Gongbang.NodeValue (tail.value);
             }
             else {
                 Gongbang.NodeStruct nstruct = new Gongbang.NodeStruct (tail.type);
-                nstruct.members = tail.subnodes;
-                node = nstruct;
+
+                HashTableIter<string, int32> iter = HashTableIter<string, int32> (tail.subnodes);
+                unowned string ik;
+                int32 iv;
+                while (iter.next(out ik, out iv)) nstruct.members[ik] = iv;
+
+                node = (owned) nstruct;
             }
 
-            int32 node_id = graph.add_node (node);
+            int32 node_id = graph.add (node);
 
             // Add subnode for parent.
             // assumes parent type is composite type.
@@ -100,7 +112,7 @@ namespace Gongbang {
 
         public void text (MarkupParseContext ctx, string text, size_t text_len) throws MarkupError {
             unowned XMLParseElement tail = (!) elements.peek_tail();
-            string actual_text = text.substring (0, (int)text_len);
+            string actual_text = text.substring (0, (int)text_len).chomp();
 
             tail.is_text = true;
 
