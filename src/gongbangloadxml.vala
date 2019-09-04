@@ -1,96 +1,91 @@
-namespace Gongbang {
+using Gongbang;
 
+/**
+ * Loading Graph from markup file.
+ *
+ * A typical markup file would look like.
+ *
+ * {{{
+ * <gongbang>
+ *   <require>Dungeon</require>
+ *   <element type="Dungeon.SkeletonWarrior">
+ *     <level>13</level>
+ *     <weapon type="Dungeon.Sword"/>
+ *   </element>
+ * </gongbang>
+ * }}}
+ *
+ *
+ * === Top levels ===
+ *
+ * Name of the root element is "gongbang"
+ *
+ *  * gongbang
+ *    * require (*)
+ *    * element (*)
+ *
+ * ==== require ====
+ *
+ * Attributes:
+ *
+ *  * private_dir: path, optional: A private path to look for typelib file.
+ *  * version: string, optional: Version to require.
+ *
+ * Contents:
+ *
+ *  * (text): string: Typelib namespace to require.
+ *
+ * "require" element denotes this file mentions types from the namespace.
+ * Any type may be used, after the corresponding namespaces are required.
+ *
+ * ==== element ====
+ *
+ * Attributes:
+ *
+ *  * type: type: A type of element
+ *  * name: string: Name of element to reference on other part.
+ *
+ * This contains values or objects at top level.
+ *
+ * === Markups for value types. ===
+ *
+ * ==== Text representations ====
+ *
+ * It is frequently to have various datas are expressed as texts.
+ *
+ * ===== Numbers =====
+ *
+ * BLAH!
+ *
+ * ===== GLib.Variant =====
+ *
+ * Variant types are processed with GLib.Variant.parse function.
+ *
+ * ===== Gio.File =====
+ *
+ * Files are denoted as paths.
+ *
+ */
+namespace Gongbang.Markup {
     /**
-     * Loading Graph from markup file.
-     *
-     * A typical markup file would look like.
-     *
-     * {{{
-     * <gongbang>
-     *   <require>Dungeon</require>
-     *   <element type="Dungeon.SkeletonWarrior">
-     *     <level>13</level>
-     *     <weapon type="Dungeon.Sword"/>
-     *   </element>
-     * </gongbang>
-     * }}}
-     *
-     *
-     * === Top levels ===
-     *
-     * Name of the root element is "gongbang"
-     *
-     *  * gongbang
-     *    * require (*)
-     *    * element (*)
-     *
-     * ==== require ====
-     *
-     * Attributes:
-     *
-     *  * private_dir: path, optional: A private path to look for typelib file.
-     *  * version: string, optional: Version to require.
-     *
-     * Contents:
-     *
-     *  * (text): string: Typelib namespace to require.
-     *
-     * "require" element denotes this file mentions types from the namespace.
-     * Any type may be used, after the corresponding namespaces are required.
-     *
-     * ==== element ====
-     *
-     * Attributes:
-     *
-     *  * type: type: A type of element
-     *  * name: string: Name of element to reference on other part.
-     *
-     * This contains values or objects at top level.
-     *
-     * === Markups for value types. ===
-     *
-     * ==== Text representations ====
-     *
-     * It is frequently to have various datas are expressed as texts.
-     *
-     * ===== Numbers =====
-     *
-     * BLAH!
-     *
-     * ===== GLib.Variant =====
-     *
-     * Variant types are processed with GLib.Variant.parse function.
-     *
-     * ===== Gio.File =====
-     *
-     * Files are denoted as paths.
-     *
+     * Loads Graph from markup.
      */
-    namespace Markup {
-        public Graph load (InputStream stream, Cancellable? cancel = null) throws IOError, MarkupError {
-            return new Graph();
-        }
-    }
-
-    /**
-     * Loads Graph from xml.
-     */
-    public Graph load_xml (InputStream stream, Cancellable? cancel = null) throws IOError, MarkupError {
+    public Graph load (InputStream stream, Cancellable? cancel = null) throws IOError, MarkupError {
         return new Graph ();
     }
 
-    public Graph load_xml_string (string xml) throws MarkupError {
+    public Graph load_string (string markup) throws MarkupError {
         XMLParse parse = new XMLParse();
         MarkupParseContext ctx = new MarkupParseContext (load_xml_parser,
           MarkupParseFlags.PREFIX_ERROR_POSITION,
           parse, null);
-        ctx.parse (xml, -1);
+        ctx.parse (markup, -1);
 
         return parse.graph;
     }
 
-    public Graph load_xml_file (File file, Cancellable? cancel = null) throws Error {
-        return load_xml (file.read(cancel), cancel);
+    public Graph load_file (File file, Cancellable? cancel = null) throws Error {
+        return load (file.read(cancel), cancel);
     }
 
     private const MarkupParser load_xml_parser = {

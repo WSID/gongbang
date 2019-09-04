@@ -7,7 +7,7 @@ private void test_load_xml_base () {
     <root type="GObject.Object"/>
     """;
 
-    Gongbang.Graph graph = Gongbang.load_xml_string (xml);
+    Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
 
     // Tests graph.
     assert (graph.n_nodes == 1);
@@ -27,7 +27,7 @@ private void test_load_xml_string () {
     <root type="gchararray">A string.</root>
     """;
 
-    Gongbang.Graph graph = Gongbang.load_xml_string (xml);
+    Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
 
     // Tests graph.
     assert (graph.n_nodes == 1);
@@ -49,7 +49,7 @@ private void test_load_xml_variant () {
     </root>
     """;
 
-    Gongbang.Graph graph = Gongbang.load_xml_string (xml);
+    Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
 
     // Tests graph.
     assert (graph.n_nodes == 1);
