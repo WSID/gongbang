@@ -1,4 +1,77 @@
 namespace Gongbang {
+
+    /**
+     * Loading Graph from markup file.
+     *
+     * A typical markup file would look like.
+     *
+     * {{{
+     * <gongbang>
+     *   <require>Dungeon</require>
+     *   <element type="Dungeon.SkeletonWarrior">
+     *     <level>13</level>
+     *     <weapon type="Dungeon.Sword"/>
+     *   </element>
+     * </gongbang>
+     * }}}
+     *
+     *
+     * === Top levels ===
+     *
+     * Name of the root element is "gongbang"
+     *
+     *  * gongbang
+     *    * require (*)
+     *    * element (*)
+     *
+     * ==== require ====
+     *
+     * Attributes:
+     *
+     *  * private_dir: path, optional: A private path to look for typelib file.
+     *  * version: string, optional: Version to require.
+     *
+     * Contents:
+     *
+     *  * (text): string: Typelib namespace to require.
+     *
+     * "require" element denotes this file mentions types from the namespace.
+     * Any type may be used, after the corresponding namespaces are required.
+     *
+     * ==== element ====
+     *
+     * Attributes:
+     *
+     *  * type: type: A type of element
+     *  * name: string: Name of element to reference on other part.
+     *
+     * This contains values or objects at top level.
+     *
+     * === Markups for value types. ===
+     *
+     * ==== Text representations ====
+     *
+     * It is frequently to have various datas are expressed as texts.
+     *
+     * ===== Numbers =====
+     *
+     * BLAH!
+     *
+     * ===== GLib.Variant =====
+     *
+     * Variant types are processed with GLib.Variant.parse function.
+     *
+     * ===== Gio.File =====
+     *
+     * Files are denoted as paths.
+     *
+     */
+    namespace Markup {
+        public Graph load (InputStream stream, Cancellable? cancel = null) throws IOError, MarkupError {
+            return new Graph();
+        }
+    }
+
     /**
      * Loads Graph from xml.
      */
@@ -66,8 +139,8 @@ namespace Gongbang {
 
             unowned string? picked_type_str;
 
-            Markup.collect_attributes (name, attr_names, attr_values,
-                Markup.CollectType.STRING | Markup.CollectType.OPTIONAL, "type", out picked_type_str);
+            GLib.Markup.collect_attributes (name, attr_names, attr_values,
+                GLib.Markup.CollectType.STRING | GLib.Markup.CollectType.OPTIONAL, "type", out picked_type_str);
 
             GLib.Type picked_type = parse_type (picked_type_str);
 
