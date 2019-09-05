@@ -59,7 +59,7 @@ using Gongbang;
  *
  * ===== GLib.Variant =====
  *
- * Variant types are processed with GLib.Variant.parse function.
+ * Variant types are processed with {@link GLib.Variant.parse} function.
  *
  * ===== Gio.File =====
  *
@@ -88,6 +88,12 @@ namespace Gongbang.Markup {
         return parse.graph;
     }
 
+    /**
+     * Loads Graph from string.
+     *
+     * When you have full-loaded string, this would be efficient, as it pushes
+     * whole string at once.
+     */
     public Graph load_string (string markup) throws MarkupError {
         XMLParse parse = new XMLParse();
         MarkupParseContext ctx = new MarkupParseContext (load_xml_parser,
@@ -98,6 +104,9 @@ namespace Gongbang.Markup {
         return parse.graph;
     }
 
+    /**
+     * Loads Graph from file.
+     */
     public Graph load_file (File file, Cancellable? cancel = null) throws Error {
         return load (file.read(cancel), cancel);
     }
