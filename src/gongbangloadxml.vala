@@ -71,7 +71,21 @@ namespace Gongbang.Markup {
      * Loads Graph from markup.
      */
     public Graph load (InputStream stream, Cancellable? cancel = null) throws IOError, MarkupError {
-        return new Graph ();
+        uint8[] buffer = new uint8[4096];
+        ssize_t buffer_readsize = 0;
+
+        XMLParse parse = new XMLParse();
+        MarkupParseContext ctx = new MarkupParseContext (load_xml_parser,
+          MarkupParseFlags.PREFIX_ERROR_POSITION,
+          parse, null);
+
+        do {
+            buffer_readsize = stream.read(buffer, cancel);
+            ctx.parse ((string)buffer, buffer_readsize);
+        } while (buffer_readsize != 0);
+
+        ctx.end_parse();
+        return parse.graph;
     }
 
     public Graph load_string (string markup) throws MarkupError {
@@ -80,7 +94,7 @@ namespace Gongbang.Markup {
           MarkupParseFlags.PREFIX_ERROR_POSITION,
           parse, null);
         ctx.parse (markup, -1);
-
+        ctx.end_parse();
         return parse.graph;
     }
 
