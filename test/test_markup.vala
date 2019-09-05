@@ -1,5 +1,5 @@
 
-private void test_load_xml_base () {
+private void test_markup_base () {
     GI.Repository.get_default().require ("GObject", null, 0);
 
     const string xml =
@@ -18,7 +18,7 @@ private void test_load_xml_base () {
     assert (node.type == typeof (Object));
 }
 
-private void test_load_xml_string () {
+private void test_markup_string () {
     GI.Repository.get_default().require ("GLib", null, 0);
     GI.Repository.get_default().require ("GObject", null, 0);
 
@@ -38,7 +38,7 @@ private void test_load_xml_string () {
     assert (node.value.get_string() == "A string.");
 }
 
-private void test_load_xml_variant () {
+private void test_markup_variant () {
     GI.Repository.get_default().require ("GLib", null, 0);
     GI.Repository.get_default().require ("GObject", null, 0);
 
@@ -74,9 +74,9 @@ private void test_load_xml_variant () {
 public int main (string[] args) {
     Test.init (ref args);
 
-    Test.add_func ("/gongbang/load/xml/base", test_load_xml_base);
-    Test.add_func ("/gongbang/load/xml/text/string", test_load_xml_string);
-    Test.add_func ("/gongbang/load/xml/text/variant", test_load_xml_variant);
+    Test.add_func ("/gongbang/markup/base", test_markup_base);
+    Test.add_func ("/gongbang/markup/text/string", test_markup_string);
+    Test.add_func ("/gongbang/markup/text/variant", test_markup_variant);
 
     return Test.run ();
 }
