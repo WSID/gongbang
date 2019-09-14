@@ -1,74 +1,101 @@
 
 private void test_markup_base () {
-    GI.Repository.get_default().require ("GObject", null, 0);
+    try {
+        GI.Repository.get_default().require ("GObject", null, 0);
 
-    const string xml =
-    """
-    <root type="GObject.Object"/>
-    """;
+        const string xml =
+        """
+        <gongbang>
+          <require>GObject</require>
+          <element type="GObject.Object"/>
+        </gongbang>
+        """;
 
-    Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
+        Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
 
-    // Tests graph.
-    assert (graph.n_nodes == 1);
+        // Tests graph.
+        assert (graph.n_nodes == 1);
 
-    Gongbang.NodeStruct? node = graph[1] as Gongbang.NodeStruct;
+        Gongbang.NodeStruct? node = graph[1] as Gongbang.NodeStruct;
 
-    assert (node != null);
-    assert (node.type == typeof (Object));
+        assert (node != null);
+        assert (node.type == typeof (Object));
+    }
+    catch (Error e) {
+        critical ("%s", e.message);
+        return;
+    }
 }
 
 private void test_markup_string () {
-    GI.Repository.get_default().require ("GLib", null, 0);
-    GI.Repository.get_default().require ("GObject", null, 0);
+    try {
+        GI.Repository.get_default().require ("GLib", null, 0);
+        GI.Repository.get_default().require ("GObject", null, 0);
 
-    const string xml =
-    """
-    <root type="gchararray">A string.</root>
-    """;
+        const string xml =
+        """
+        <gongbang>
+          <element type="gchararray">A string.</element>
+        </gongbang>
+        """;
 
-    Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
+        Gongbang.Graph graph;
 
-    // Tests graph.
-    assert (graph.n_nodes == 1);
+        graph = Gongbang.Markup.load_string (xml);
 
-    Gongbang.NodeValue? node = graph[1] as Gongbang.NodeValue;
+        // Tests graph.
+        assert (graph.n_nodes == 1);
 
-    assert (node != null);
-    assert (node.value.get_string() == "A string.");
+        Gongbang.NodeValue? node = graph[1] as Gongbang.NodeValue;
+
+        assert (node != null);
+        assert (node.value.get_string() == "A string.");
+    }
+    catch (Error e) {
+        critical ("%s", e.message);
+        return;
+    }
 }
 
 private void test_markup_variant () {
-    GI.Repository.get_default().require ("GLib", null, 0);
-    GI.Repository.get_default().require ("GObject", null, 0);
+    try {
+        GI.Repository.get_default().require ("GLib", null, 0);
+        GI.Repository.get_default().require ("GObject", null, 0);
 
-    const string xml =
-    """
-    <root type="GVariant">
-        [1, 2, 3]
-    </root>
-    """;
+        const string xml =
+        """
+        <gongbang>
+          <element type="GVariant">
+              [1, 2, 3]
+          </element>
+        </gongbang>
+        """;
 
-    Gongbang.Graph graph = Gongbang.Markup.load_string (xml);
+        Gongbang.Graph graph;
+        graph = Gongbang.Markup.load_string (xml);
+        // Tests graph.
+        assert (graph.n_nodes == 1);
 
-    // Tests graph.
-    assert (graph.n_nodes == 1);
+        Gongbang.NodeValue? node = graph[1] as Gongbang.NodeValue;
 
-    Gongbang.NodeValue? node = graph[1] as Gongbang.NodeValue;
+        assert (node != null);
+        Variant variant = (Variant) node.value;
 
-    assert (node != null);
-    Variant variant = (Variant) node.value;
+        assert (variant.is_of_type(new VariantType("ai")));
 
-    assert (variant.is_of_type(new VariantType("ai")));
-
-    VariantIter vi = variant.iterator();
-    int element;
-    assert (vi.next ("i", out element));
-    assert (element == 1);
-    assert (vi.next ("i", out element));
-    assert (element == 2);
-    assert (vi.next ("i", out element));
-    assert (element == 3);
+        VariantIter vi = variant.iterator();
+        int element;
+        assert (vi.next ("i", out element));
+        assert (element == 1);
+        assert (vi.next ("i", out element));
+        assert (element == 2);
+        assert (vi.next ("i", out element));
+        assert (element == 3);
+    }
+    catch (Error e) {
+        critical ("%s", e.message);
+        return;
+    }
 }
 
 public int main (string[] args) {

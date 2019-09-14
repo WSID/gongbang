@@ -112,8 +112,8 @@ namespace Gongbang.Markup {
     }
 
     private const MarkupParser load_xml_parser = {
-        XMLParse.start_element,
-        XMLParse.end_element,
+        XMLParse.start,
+        XMLParse.end,
         XMLParse.text,
         null,
         null
@@ -133,20 +133,78 @@ namespace Gongbang.Markup {
         }
     }
 
-    /* This will parse either of one form.
-     * <some-field type="GObject.Object">
-     * </some-field>
-     *
-     * some literal values.
-     */
+
     [Compact]
     private class XMLParse {
+        public enum State {
+            REQUIRE,
+            ELEMENT
+        }
+
         public Graph graph;
         public Queue<XMLParseElement> elements;
+        public int depth;
+        public State state;
 
         public XMLParse() {
             graph = new Graph();
             elements = new Queue<XMLParseElement>();
+            depth = 0;
+        }
+
+        public void start (MarkupParseContext ctx, string name, string[] attr_names, string[] attr_values) throws MarkupError {
+            switch (depth) {
+                case 0:
+                if (name != "gongbang") {
+                    throw new MarkupError.UNKNOWN_ELEMENT("Invalid root element: %s", name);
+                }
+                break;
+
+                case 1:
+                switch (name) {
+                    case "require":
+                    state = State.REQUIRE;
+                    break;
+
+                    case "element":
+                    state = State.ELEMENT;
+                    start_element (ctx, name, attr_names, attr_values);
+                    break;
+
+                    default:
+                    throw new MarkupError.UNKNOWN_ELEMENT("Unknown element: %s", name);
+                }
+                break;
+
+                default:
+                start_element (ctx, name, attr_names, attr_values);
+                break;
+            }
+
+            depth++;
+        }
+
+        public void end (MarkupParseContext ctx, string name) throws MarkupError{
+            if ((1 < depth) && (state == State.ELEMENT)) end_element(ctx, name);
+
+            depth--;
+        }
+
+        public void text (MarkupParseContext ctx, string text, size_t text_len) throws MarkupError {
+            if (1 < depth) {
+                switch (state) {
+                    case State.REQUIRE:
+                    // TODO: add require to elements.
+                    break;
+
+                    case State.ELEMENT:
+                    text_element(ctx, text, text_len);
+                    break;
+
+                    default:
+                    throw new MarkupError.INVALID_CONTENT("Text is not allowed!");
+                }
+            }
         }
 
         public void start_element (MarkupParseContext ctx, string name, string[] attr_names, string[] attr_values) throws MarkupError {
@@ -201,7 +259,7 @@ namespace Gongbang.Markup {
                 parent.subnodes[name] = node_id;
         }
 
-        public void text (MarkupParseContext ctx, string text, size_t text_len) throws MarkupError {
+        public void text_element (MarkupParseContext ctx, string text, size_t text_len) throws MarkupError {
             unowned XMLParseElement tail = (!) elements.peek_tail();
             string actual_text = text.substring (0, (int)text_len).chomp();
 
@@ -271,9 +329,6 @@ namespace Gongbang.Markup {
 
         private GI.TypeInfo? check_name (string name) throws MarkupError {
             if (elements.is_empty()) {
-                if (name != "root")
-                    throw new MarkupError.UNKNOWN_ELEMENT("Root element should be \"root\", not \"%s\"", name);
-
                 return null;
             }
 
