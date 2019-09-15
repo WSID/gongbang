@@ -29,14 +29,15 @@ using Gongbang;
  * Attributes:
  *
  *  * private_dir: path, optional: A private path to look for typelib file.
- *  * version: string, optional: Version to require.
  *
  * Contents:
  *
  *  * (text): string: Typelib namespace to require.
  *
- * "require" element denotes this file mentions types from the namespace.
- * Any type may be used, after the corresponding namespaces are required.
+ * "require" element denotes this file mentions types from the namespace,
+ * optionally with version. "GLib" and "GObject" is required automatically.
+ *
+ * When type is used without its namespace is required, then warning may be emitted.
  *
  * ==== element ====
  *
@@ -144,12 +145,24 @@ namespace Gongbang.Markup {
         public Graph graph;
         public Queue<XMLParseElement> elements;
         public int depth;
+        public GenericSet<string> reqs;
         public State state;
 
         public XMLParse() {
             graph = new Graph();
             elements = new Queue<XMLParseElement>();
             depth = 0;
+
+            reqs = new GenericSet<string> (str_hash, str_equal);
+            reqs.add ("GLib");
+            reqs.add ("GObject");
+            try {
+                GI.Repository.get_default().require ("GLib", null, 0);
+                GI.Repository.get_default().require ("GObject", null, 0);
+            }
+            catch (Error e) {
+                critical ("Basic namespace cannot be loaded: %s", e.message);
+            }
         }
 
         public void start (MarkupParseContext ctx, string name, string[] attr_names, string[] attr_values) throws MarkupError {
@@ -194,7 +207,7 @@ namespace Gongbang.Markup {
             if (1 < depth) {
                 switch (state) {
                     case State.REQUIRE:
-                    // TODO: add require to elements.
+                    text_require(text[0:(int)text_len].strip());
                     break;
 
                     case State.ELEMENT:
@@ -205,6 +218,26 @@ namespace Gongbang.Markup {
                     throw new MarkupError.INVALID_CONTENT("Text is not allowed!");
                 }
             }
+        }
+
+        public void text_require (string text) throws MarkupError {
+            int split = text.last_index_of_char ('-');
+
+            string ns_name = text;
+            string? ns_version = null;
+            if (split != -1) {
+                ns_name = text.substring(0, split);
+                ns_version = text.substring(split + 1);
+            }
+
+            try {
+                GI.Repository.get_default().require (ns_name, ns_version, 0);
+            }
+            catch (Error e) {
+                throw new MarkupError.INVALID_CONTENT ("Namespace cannot loaded: %s", e.message);
+            }
+
+            reqs.add (ns_name);
         }
 
         public void start_element (MarkupParseContext ctx, string name, string[] attr_names, string[] attr_values) throws MarkupError {
@@ -261,7 +294,7 @@ namespace Gongbang.Markup {
 
         public void text_element (MarkupParseContext ctx, string text, size_t text_len) throws MarkupError {
             unowned XMLParseElement tail = (!) elements.peek_tail();
-            string actual_text = text.substring (0, (int)text_len).chomp();
+            string actual_text = text.substring (0, (int)text_len).strip();
 
             tail.is_text = true;
 
@@ -308,6 +341,11 @@ namespace Gongbang.Markup {
             else {
                 string type_ns = name[0:split_index];
                 string type_name = name[split_index + 1 : name.length];
+
+                if (! (type_ns in reqs)) {
+                    warning ("%s: Namespace %s is not required by parsed files.", name, type_ns);
+                }
+
                 GI.BaseInfo? info = GI.Repository.get_default().find_by_name (type_ns, type_name);
 
                 if (info == null) {

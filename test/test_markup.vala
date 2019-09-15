@@ -1,12 +1,9 @@
 
 private void test_markup_base () {
     try {
-        GI.Repository.get_default().require ("GObject", null, 0);
-
         const string xml =
         """
         <gongbang>
-          <require>GObject</require>
           <element type="GObject.Object"/>
         </gongbang>
         """;
@@ -29,9 +26,6 @@ private void test_markup_base () {
 
 private void test_markup_string () {
     try {
-        GI.Repository.get_default().require ("GLib", null, 0);
-        GI.Repository.get_default().require ("GObject", null, 0);
-
         const string xml =
         """
         <gongbang>
@@ -59,9 +53,6 @@ private void test_markup_string () {
 
 private void test_markup_variant () {
     try {
-        GI.Repository.get_default().require ("GLib", null, 0);
-        GI.Repository.get_default().require ("GObject", null, 0);
-
         const string xml =
         """
         <gongbang>
