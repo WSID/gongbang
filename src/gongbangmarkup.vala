@@ -56,7 +56,8 @@ using Gongbang;
  *
  * ===== Numbers =====
  *
- * BLAH!
+ * Integer numbers are parsed by {@link int64.try_parse} and {@link uint64.try_parse}.
+ * Float numbers are parsed by {@link float.try_parse} and {@link double.try_parse}.
  *
  * ===== GLib.Variant =====
  *
@@ -64,7 +65,7 @@ using Gongbang;
  *
  * ===== Gio.File =====
  *
- * Files are denoted as paths.
+ * Files are denoted as paths. File is retrived by {@link GLib.File.from_path}.
  *
  */
 namespace Gongbang.Markup {
@@ -315,6 +316,87 @@ namespace Gongbang.Markup {
             }
             else if (tail.type == typeof (Type)) {
                 tail.value = parse_type (actual_text);
+            }
+            else if (tail.type == typeof (int)) switch (actual_text) {
+                case "min":
+                case "MIN":
+                tail.value = int.MIN;
+                break;
+
+                case "max":
+                case "MAX":
+                tail.value = int.MAX;
+                break;
+
+                default:
+                int64 v64;
+                if (! int64.try_parse (actual_text, out v64)) {
+                    throw new MarkupError.INVALID_CONTENT(
+                        "Non integer value: %s", actual_text);
+                }
+
+                if (v64 < int.MIN) {
+                    tail.value = int.MIN;
+                    warning ("Underflow detected: %s < %d", actual_text, int.MIN);
+                }
+
+                else if (v64 > int.MAX) {
+                    tail.value = int.MAX;
+                    warning ("Overflow detected: %s > %d", actual_text, int.MAX);
+                }
+
+                else {
+                    tail.value = (int) v64;
+                }
+                break;
+            }
+
+            else if (tail.type == typeof (uint)) switch (actual_text) {
+                case "max":
+                case "MAX":
+                tail.value = uint.MAX;
+                break;
+
+                default:
+                uint64 v64;
+                if (! uint64.try_parse (actual_text, out v64)) {
+                    throw new MarkupError.INVALID_CONTENT(
+                        "Non unsigned integer value: %s", actual_text);
+                }
+
+                else if (v64 > uint.MAX) {
+                    tail.value = uint.MAX;
+                    warning ("Overflow detected: %s > %d", actual_text, int.MAX);
+                }
+
+                else {
+                    tail.value = (uint) v64;
+                }
+                break;
+            }
+
+            else if (tail.type == typeof (float)) {
+                float v;
+                if (! float.try_parse (actual_text, out v)) {
+                    throw new MarkupError.INVALID_CONTENT(
+                        "Non float value: %s", actual_text);
+                }
+
+                tail.value = v;
+            }
+
+            else if (tail.type == typeof (double)) {
+                double v;
+                if (! double.try_parse (actual_text, out v)) {
+                    throw new MarkupError.INVALID_CONTENT(
+                        "Non float value: %s", actual_text);
+                }
+
+                tail.value = v;
+            }
+
+            else if (tail.type == typeof (File)) {
+                tail.value = File.new_for_path (actual_text);
             }
 
             else {
